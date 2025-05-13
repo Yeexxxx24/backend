@@ -18,6 +18,9 @@ app.use(cors())
 const userRouter = require('./routes/user')
 app.use('/api',userRouter)
 
+const uploadRouter = require('./routes/upload')
+app.use('/api',uploadRouter)
+
 // 获取端口号 从.evn获取
 const PORT = process.env.PORT || 3000
 
