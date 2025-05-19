@@ -21,6 +21,10 @@ app.use('/api',userRouter)
 const uploadRouter = require('./routes/upload')
 app.use('/api',uploadRouter)
 
+//注册/api/check路由
+const checkRouter = require('./routes/check')
+app.use('/api/check',checkRouter)
+
 // 获取端口号 从.evn获取
 const PORT = process.env.PORT || 3000
 

@@ -11,6 +11,8 @@ router.post('/register',userController.register)
 // 登录接口
 router.post('/login',userController.login)
 
+router.post('/change-password', userController.changePassword)
+
 // 导出模块，供app.js使用
 module.exports = router
 

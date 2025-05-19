@@ -1,0 +1,262 @@
+#include<iostream> 
+using namespace std;
+#define MAXSIZE 3  //停车场内最多的停车数
+#define MAXQSIZE 4  //候车场内最多的停车数
+#define Price 2  //每单位停车费用
+#define OK 1 
+#define ERROR 0
+#define OVERFLOW -2
+typedef int Status;
+typedef int QElemType; 
+
+//车辆信息 
+typedef struct 
+{
+	int CarNo;  //车牌号
+	int CarTime; //进场时间
+}Car;
+//顺序栈的表示
+typedef struct 
+{
+	Car *base;
+	Car *top;
+	int stacksize;
+}SqStack;  //声明顺序栈类型
+typedef struct {
+   QElemType *CarNo;  //车牌号
+   int  front;            //头指针   
+   int  rear;             //尾指针
+}SqQueue;    //声明环形队列类型
+
+//顺序栈初始化
+Status InitStack(SqStack &S)
+{
+	S.base =new Car[MAXSIZE];
+	if( !S.base ) 	exit(OVERFLOW);
+	S.top = S.base;
+	S.stacksize = MAXSIZE;
+	return OK;
+}
+//判断顺序栈是否为空
+bool StackEmpty( SqStack S )
+{
+	if(S.top == S.base) return true;
+   else return false;
+}
+//判断顺序栈是否为满 
+bool StackFull( SqStack S )
+{
+	if( S.top - S.base== S.stacksize ) return true;
+   else return false;
+}
+//求顺序栈的长度
+int StackLength( SqStack S )
+{
+	return S.top-S.base;
+}
+//顺序栈进栈
+Status Push(SqStack &S, Car e)  
+{
+	if( S.top - S.base== S.stacksize ) // (1)判断是否栈满，若满则出错
+        return ERROR; 	
+	*S.top=e;    //(2)元素e压入栈顶
+	S.top++;     //(3)栈顶指针加1
+	return OK;
+}
+//顺序栈出栈
+Status Pop( SqStack &S, Car &e)  
+{
+	if( S.top == S.base ) // (1)判断是否栈空，若空则出错
+        return ERROR; 	
+	--S.top;   //(2)栈顶指针向下移一位 
+	e=*S.top;  //(3)获取栈顶元素e
+	return OK;
+}
+//显示栈中元素 
+Status DispStack(SqStack S) 
+{
+	Car *p;
+	Car elem;
+	p=S.top;
+	cout<<"车牌号      "<<"进场时间"<<endl; 
+	for(int j=0;j<StackLength(S);j++)
+	{
+		if(S.top == S.base) return ERROR; 	// 栈空
+		elem = *(--p);
+		cout<<elem.CarNo<<"               "<<elem.CarTime<<endl; 
+	}
+	cout<<endl; 
+	return OK;
+}
+
+//以下为队列的运算算法
+
+//循环队列初始化
+Status InitQueue (SqQueue &Q){
+	Q.CarNo =new QElemType[MAXQSIZE]; 
+	if(!Q.CarNo) exit(OVERFLOW);
+    Q.front=Q.rear=0;
+    return OK;
+}
+//判断循环队列是否为空 
+bool QueueEmpty(SqQueue Q) 
+{
+	if(Q.front==Q.rear) return true;
+	else return false;
+}
+//判断队满 
+bool QueueFull(SqQueue Q)
+{
+	if((Q.rear+1)%MAXQSIZE==Q.front)  return true;
+	else return false;
+}
+//求循环队列的长度
+int  QueueLength(SqQueue Q){
+    return (Q.rear-Q.front+MAXQSIZE)%MAXQSIZE;                             
+ }
+//循环队列入队（队尾入队）
+Status EnQueue(SqQueue &Q,QElemType e){
+    if((Q.rear+1)%MAXQSIZE==Q.front)  return ERROR;
+    Q.CarNo[Q.rear]=e;
+    Q.rear=(Q.rear+1)%MAXQSIZE;
+     return OK;
+}
+//循环队列出队（队头出队）
+Status DeQueue(SqQueue &Q,QElemType &e){
+   if(Q.front==Q.rear) return ERROR;
+   e=Q.CarNo[Q.front];
+   Q.front=(Q.front+1)%MAXQSIZE;
+   return OK;
+}
+//显示队中元素 
+void DispQueue(SqQueue Q)
+{
+	int queue=Q.front; 
+	for(int i=0;i<QueueLength(Q);i++)
+	{
+		cout<<Q.CarNo[queue]<<"  "; 
+		queue = (queue + 1) % MAXQSIZE;  // 更新队头指针，实现循环	
+	}
+	cout<<endl; 
+ } 
+
+
+int main()
+{
+	SqStack S1;  //停车场S1 
+	SqStack S2;  //临时栈S2 
+	SqQueue Q;   //候车场Q 
+	//顺序栈初始化
+	InitStack(S1);
+	InitStack(S2);
+	//初始化循环队列 
+	InitQueue (Q);
+	int comm;//输出的指令序号 
+	Car thisCar;
+	int carno;
+	int cartime,leavetime;
+	do
+	{
+		cout<<"输入指令（1：到达 2：离开 3：停车场 4：候车场 0：退出）：";
+		cin>>comm;
+		switch(comm) 
+		{
+			case 1:                           //汽车到达 
+				cout<<"车号 到达时间：";
+				cin>>carno>>cartime;
+				thisCar.CarNo=carno;
+				thisCar.CarTime=cartime;
+				if(!StackFull(S1))              //停车场不满
+				{
+					Push(S1, thisCar);
+					cout<<"停车场位置："<<S1.top-1<<endl;     
+				} 
+				else                         //停车场已满 
+				{
+					if(!QueueFull(Q))       //候车场未满
+					{
+						EnQueue(Q,carno);
+						cout<<"候车场位置："<<(Q.rear-1)%MAXQSIZE + 1<<endl;
+					 } 
+					else cout<<"候车场已满，不能停车！"<<endl; 
+				}
+				break;
+			case 2:
+				cout<<"车号 离开时间：";    //汽车离开 
+				cin>>carno>>leavetime;
+				Car *find;
+				Car outcar;
+				find=S1.base;
+				while(find->CarNo!=carno && find!=S1.top)  //查找carno
+				{
+					++find;
+				}
+				if(find==S1.top) cout<<"未找到该编号的汽车！"<<endl;
+				else 
+				{
+					Car e;
+					// Car *p=(--S1.top);  //top指针向下移了一位 ，应改成 S1.top-1
+					Car *p=(S1.top-1);
+					while(p!=find)
+					{
+						Pop(S1, e); //当停车场内某辆车要离开时,在它之后进入的车辆必须先退出车场为它让路,即将之后进入的车辆放入临时栈S2中  
+						Push(S2, e);
+						--p;		
+					}
+					Pop(S1,e);//该编号carno的汽车离开 
+					cout<<"该汽车的停车费用：" << (leavetime-find->CarTime)*Price<<endl;//每辆停放在车场的车在它离开停车场时必须按它停留的时间长短交纳费用。
+					Car elem;
+					while(!StackEmpty(S2))  	//临时栈S2中的其他车辆再按原次序进入停车场S1 
+					{
+						Pop(S2,elem);
+						Push(S1, elem);
+					}
+					int Qcarno,Qtime;
+					Car Qcar;
+					if(!QueueEmpty(Q))   //队不空，将队头进栈S1 
+					{
+						DeQueue(Q,Qcarno);
+						Qcar.CarNo=Qcarno;
+						Qcar.CarTime=leavetime;  //以该汽车离开，候车场的汽车立马进入停车场，以该时间开始计费 
+						Push(S1,Qcar);
+					}
+				}
+				break;
+			case 3:	
+				if(!StackEmpty(S1))                     //输出停车场中的车辆 
+				{
+					cout<<"停车场中的车辆："<<endl;
+					DispStack(S1); 
+				}
+				else cout<<"停车场中无车辆"<<endl;
+				break; 
+			case 4:
+				if(!QueueEmpty(Q))                     //输出侯车场中的车辆 
+				{
+					cout<<"侯车场中的车辆："<<endl;
+					DispQueue(Q);
+				}
+				else cout<<"侯车场中无车辆"<<endl;
+				break;	
+			case 0:                                     //结束
+			 	if(!StackEmpty(S1))                    //输出停车场中的车辆 
+				{
+					cout<<"停车场中的车辆："<<endl;
+					DispStack(S1); 
+				}
+				if(!QueueEmpty(Q))                    //输出侯车场中的车辆 
+				{
+					cout<<"侯车场中的车辆："<<endl;  
+					DispQueue(Q);
+				}
+				break;
+			default:                                   //其他情况 
+				cout<<"输入的命令错误！"<<endl;
+				break; 
+		}
+	}while(comm!=0);
+
+	return OK;	
+}
+
+
