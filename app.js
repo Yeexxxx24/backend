@@ -18,12 +18,22 @@ app.use(cors())
 const userRouter = require('./routes/user')
 app.use('/api',userRouter)
 
+// 下载文件
 const uploadRouter = require('./routes/upload')
 app.use('/api',uploadRouter)
 
 //注册/api/check路由
 const checkRouter = require('./routes/check')
 app.use('/api/check',checkRouter)
+
+// 发布作业
+const assignmentRouter = require('./routes/assignment')
+app.use('/api/assignment',assignmentRouter)
+
+// 注册学生提交作业接口
+const submissionRouter = require('./routes/submission')
+app.use('/api/submission',submissionRouter)
+
 
 // 获取端口号 从.evn获取
 const PORT = process.env.PORT || 3000
