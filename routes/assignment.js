@@ -96,4 +96,22 @@ router.get('/all',async(req,res) => {
     
   }
 })
+
+// 学生 获取单个作业详情
+router.get('/detail',async (req,res) => {
+  const {id} = req.query
+  if(!id){
+    return res.status(400).json({code:400,message:'缺少作业ID'})
+  }
+  try {
+    const [rows] = await db.query('SELECT *FROM assignment WHERE id = ?',[id])
+    if(rows.length === 0){
+      return res.status(400).json({code:404,message:'作业不存在'})
+    }
+    res.json({code:200,data:rows[0]})
+  } catch (error) {
+     console.error('获取作业详情失败:', error);
+     res.status(500).json({ code: 500, message: '服务器错误' });
+  }
+})
 module.exports = router;
