@@ -114,4 +114,51 @@ router.get('/detail',async (req,res) => {
      res.status(500).json({ code: 500, message: '服务器错误' });
   }
 })
+
+// 教师查看某个作业的提交记录
+router.get('/list', async (req, res) => {
+  const { assignmentId } = req.query;
+
+  if (!assignmentId) {
+    return res.status(400).json({ code: 400, message: '缺少 assignmentId 参数' });
+  }
+
+  try {
+    // 所有学生（可以按需筛选某门课的学生）
+    const [students] = await db.query(`
+      SELECT id AS studentId, name AS studentName FROM user WHERE role = 'student'
+    `);
+
+    // 已提交的记录
+    const [submissions] = await db.query(`
+      SELECT s.student_id AS studentId, s.filename, s.submitted_at
+      FROM submission s
+      WHERE s.assignment_id = ?
+    `, [assignmentId]);
+
+    const submissionMap = new Map();
+    submissions.forEach(s => {
+      submissionMap.set(s.studentId, s);
+    });
+
+    // 合并：把所有学生补上提交信息
+    const result = students.map(student => {
+      const sub = submissionMap.get(student.studentId);
+      return {
+        studentId: student.studentId,
+        studentName: student.studentName,
+        submittedAt: sub?.submitted_at || null,
+        filename: sub?.filename || null
+      };
+    });
+
+    res.json({ code: 200, data: result });
+  } catch (error) {
+    console.error('获取提交记录失败：', error);
+    res.status(500).json({ code: 500, message: '服务器错误' });
+  }
+});
+
+
+
 module.exports = router;

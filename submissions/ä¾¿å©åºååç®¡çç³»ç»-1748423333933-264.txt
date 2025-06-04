@@ -1,0 +1,133 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct {
+        int id;// 商品编号
+        char name[20];// 商品名称
+        float price;// 商品价格
+        int amount;// 商品数量
+}Product;
+
+// 添加新商品到库存列表
+void addProduct(Product* productList, int* count) {
+        productList[*count].id = *count + 1;
+        printf("请输入商品名字：");
+        scanf("%s", productList[*count].name);
+        printf("请输入价格：");
+        scanf("%f", &productList[*count].price);
+        printf("请输入数量：");
+        scanf("%d", &productList[*count].amount);
+        (*count)++;
+        printf("添加成功！\n");
+}
+
+// 显示库存列表
+void displayProducts(Product* productList, int count) {
+    printf("----------->库存列表<---------\n");
+    printf("编号\t名称\t价格\t数量\n");
+    for (int i = 0; i < count; i++) {
+        printf("%d\t%s\t%.1f\t%d\n", productList[i].id, productList[i].name,
+        productList[i].price, productList[i].amount);
+    }
+}
+
+// 删除指定编号的商品
+void removeProduct(Product* productList, int* count) {
+    int productId;
+    displayProducts(productList, *count);
+    printf("输入编号删除：");
+    scanf("%d", &productId);
+    if (productId <= 0 || productId > *count) {
+        printf("无效编号！\n");
+        return;
+    }
+    for (int i = productId-1; i < *count-1; i++) {
+        productList[i] = productList[i+1];
+    }
+    (*count)--;
+    printf("删除成功！\n");
+}
+
+//查找商品
+void findProduct(Product* productList, int count){
+    char proname[20];
+    printf("请输入商品名称：");
+    scanf("%s",proname);
+    for (int i = 0; i < count; i++)
+    {
+        if (strcmp(productList[i].name, proname) ==0) {
+            printf("编号\t名称\t价格\t数量\n");
+            printf("%d\t%s\t%.1f\t%d\n", productList[i].id, productList[i].name,
+            productList[i].price, productList[i].amount);
+            return;
+        }
+        else if (strcmp(productList[i].name, proname) !=0)
+        {
+            printf("未找到匹配的商品，请重新输入。\n");
+        }
+        
+    }
+    
+}
+
+// 修改指定编号的商品
+void updateProduct(Product* productList, int count) {
+    int productId;
+    displayProducts(productList, count);
+    printf("输入编号修改：");
+    scanf("%d", &productId);
+    if (productId <= 0 || productId > count) {
+        printf("无效编号！\n");
+        return;
+    }
+    printf("请输入名称：");
+    scanf("%s", productList[productId-1].name);
+    printf("请输入价格：");
+    scanf("%f", &productList[productId-1].price);
+    printf("请输入数量：");
+    scanf("%d", &productList[productId-1].amount);
+    printf("修改成功！\n");
+}
+
+int main() {
+    Product productList[100]; // 最多存储100个商品
+    int productCount = 0;// 实际商品数量
+    int choice;
+    while (1) {
+        printf("-------便利店商品管理系统------\n");
+        printf("    1. 添加新商品\n");
+        printf("    2. 查找商品\n");
+        printf("    3. 删除指定商品\n");
+        printf("    4. 修改指定商品\n");
+        printf("    5. 查看库存列表\n");
+        printf("    6. 退出程序\n");
+        printf("------------------------------\n");
+        printf("请选择操作：");
+        scanf("%d", &choice);
+        switch (choice) {
+            case 1:
+                addProduct(productList, &productCount);
+                break;
+            case 2:
+                findProduct(productList, productCount);
+                break;
+            case 3:
+                removeProduct(productList, &productCount);
+                break;
+            case 4:
+                updateProduct(productList, productCount);
+                break;
+            case 5:
+                displayProducts(productList, productCount);
+                break;
+            case 6:
+                printf("感谢使用！\n");
+                exit(0);
+            default:
+                printf("无效选择！\n");
+        }
+    }
+    return 0;
+}
+
